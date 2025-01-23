@@ -1,63 +1,38 @@
 using UnityEngine;
 
-public class EnemyAI : MonoBehaviour
+public class MoveTowardsPlayerWithRigidbody : MonoBehaviour
 {
-    public float detectionRadius = 10f; // Distance within which the enemy detects the player
-    public float avoidanceRadius = 2f; // Distance to avoid other enemies
-    public float moveSpeed = 3f; // Speed of the enemy movement
-
-    private Transform playerTransform;
+    public float moveSpeed = 5f;
+    public float detectionRange = 10f;
+    private Rigidbody2D rb;
+    private GameObject playerChildren;
 
     void Start()
     {
-        // Find the PlayerAI script in the scene
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player != null)
-        {
-            playerTransform = player.transform;
-        }
+        rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        if (playerTransform != null)
+        playerChildren = GameObject.FindGameObjectWithTag("PlayerChildren");
+
+        if (playerChildren != null)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-
-            // Move towards the player if within detection radius
-            if (distanceToPlayer < detectionRadius)
+            float distance = Vector2.Distance(transform.position, playerChildren.transform.position);
+            if (distance < detectionRange)
             {
-                Vector3 directionToPlayer = (playerTransform.position - transform.position).normalized;
-
-                // Check for nearby enemies
-                Collider[] nearbyEnemies = Physics.OverlapSphere(transform.position, avoidanceRadius);
-                foreach (Collider enemy in nearbyEnemies)
-                {
-                    if (enemy.gameObject != gameObject) // Avoid self
-                    {
-                        Vector3 directionToEnemy = (enemy.transform.position - transform.position).normalized;
-                        directionToPlayer += -directionToEnemy; // Adjust direction away from the enemy
-                    }
-                }
-
-                // Move the enemy
-                transform.position += directionToPlayer.normalized * moveSpeed * Time.deltaTime;
+                Vector2 direction = (playerChildren.transform.position - transform.position).normalized;
+                rb.MovePosition(rb.position + direction * moveSpeed * Time.deltaTime);
             }
         }
     }
 
-    
-    // This method is called when the collider attached to this GameObject
-    // collides with another collider.
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        // Check if the object collided with has the tag "Enemy"
-        if (collision.gameObject.CompareTag("Player"))
+        if (other.CompareTag("PlayerChildren"))
         {
-            // Destroy both the player and the enemy
-            Destroy(collision.gameObject); // Destroy the enemy
-            Destroy(gameObject); // Destroy the player
+            Destroy(gameObject);
+            Destroy(other.gameObject);
         }
     }
-
 }
