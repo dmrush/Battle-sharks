@@ -23,7 +23,7 @@ public class SmoothFollowPlayer : MonoBehaviour
 
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
 
-        transform.rotation = Quaternion.Euler(0, 0, -90);
+        transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
     private Vector3 CalculateSeparationForce()
